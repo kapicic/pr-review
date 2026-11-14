@@ -1,0 +1,5 @@
+# Build output — rebuilt by build-zip.sh, never committed.
+dist/
+
+__pycache__/
+*.pyc

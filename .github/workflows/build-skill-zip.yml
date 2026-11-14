@@ -1,0 +1,63 @@
+name: build-skill-zip
+
+# Builds the claude.ai upload. It cannot publish it: claude.ai has no API for
+# custom Skills, so the zip is produced here and dropped into
+# Customize > Skills by hand.
+#
+# The zip built here is the stateless edition (no state repo, no default repo).
+# For your own store, build locally with PR_REVIEW_STATE_REPO and
+# PR_REVIEW_DEFAULT_REPO set — see the README.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "README.md"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: skill/zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Build the zip
+        run: ./build-zip.sh
+
+      - name: Warn when the two editions drift
+        run: |
+          # The connector edition is a hand-written adaptation, not a
+          # generated file, so it can silently fall behind the Claude Code
+          # one. This does not fail the build — it tells you to look.
+          changed="$(git diff --name-only HEAD~1 HEAD || true)"
+          if grep -qx 'skills/pr-review/SKILL.md' <<<"$changed" \
+             && ! grep -qx 'claude-ai/SKILL.md' <<<"$changed"; then
+            echo "::warning::SKILL.md changed but claude-ai/SKILL.md did not — the connector edition may be stale."
+          fi
+
+      - uses: actions/upload-artifact@v4
+        id: zip
+        with:
+          name: pr-review-zip
+          path: dist/pr-review.zip
+          if-no-files-found: error
+
+      - name: Say where to download it
+        run: |
+          # claude.ai has no Skills API, so every green run ends in a manual
+          # drop into Customize > Skills. Put the link where you land rather
+          # than making you scroll to the Artifacts box.
+          echo "::notice title=Skill zip ready::Download and drop into claude.ai > Customize > Skills: ${{ steps.zip.outputs.artifact-url }}"
+
+      - name: Attach the zip to a release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/pr-review.zip --generate-notes

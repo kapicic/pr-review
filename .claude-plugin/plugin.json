@@ -1,0 +1,9 @@
+{
+  "name": "pr-review",
+  "version": "1.0.0",
+  "description": "Deep, stateful GitHub PR review: full or incremental, with routed review lenses, adversarial verification and one consolidated review comment.",
+  "author": { "name": "Stevan Kapicic" },
+  "repository": "https://github.com/kapicic/pr-review",
+  "license": "MIT",
+  "keywords": ["code-review", "pull-request", "github", "review"]
+}
