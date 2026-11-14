@@ -3,3 +3,9 @@ dist/
 
 __pycache__/
 *.pyc
+
+# Personal data belongs in ~/.claude/pr-review, never in the skill repo.
+state/
+review-preferences*.md
+checklist.local.md
+config.sh
