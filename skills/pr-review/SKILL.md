@@ -727,8 +727,19 @@ first, then verdict.
      findings attributed to it. A PR with zero attributed findings gets no
      review — never post an empty placeholder. If fix-directly is chosen
      instead, commit each fix on ITS attributed branch (bottom-up) and restack
-     the branches above it with `gh stack rebase --upstack` — pushing a lower branch without
-     restacking breaks the stack.
+     the branches above it — pushing a lower branch without restacking breaks
+     the stack. Stack tool: `${user_config.stack_tool}`. If this is `auto` or
+     not one of `gh-stack`, `graphite`, `git` (it stays unsubstituted outside a
+     plugin install), detect it in the repo, with
+     `C=$(git rev-parse --git-common-dir)`: `gh-stack` when `$C/gh-stack`
+     exists and `gh stack` runs; else `graphite` when
+     `$C/.graphite_repo_config` exists and `gt` is on PATH; else `git`.
+
+     | Tool | Restack from the fixed branch | Push (after the confirm) |
+     |---|---|---|
+     | `gh-stack` | `gh stack rebase --upstack` | `gh stack push` |
+     | `graphite` | `gt restack --upstack` | `gt submit --stack` |
+     | `git` | for each branch above, bottom-up: `git rebase --onto <parent> <parent's old tip> <branch>` | `git push --force-with-lease` per rebased branch |
 
    Then **verify what landed**: fetch the review back
    (`gh api repos/{owner}/{repo}/pulls/{N}/reviews` and `.../pulls/{N}/comments`,

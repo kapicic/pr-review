@@ -16,6 +16,8 @@ A deep code-review skill for GitHub pull requests. It remembers every round, so 
 
 Then run `/pr-review <PR number or URL>` inside the PR's repo, or `/pr-review` alone to pick from your review queue. It needs `gh` (logged in), `git`, `jq` and `python3`.
 
+The install asks one question, `stack_tool`: how to restack a stacked PR's upper branches after you choose "fix directly" on a lower one. Pick `gh-stack`, `graphite` or `git`, or keep `auto`, which detects the tool per repo. Change it later in `/config`.
+
 ## Your data
 
 The skill is code. Everything it learns about your reviews lives in `~/.claude/pr-review/`:
